@@ -11,6 +11,8 @@ public class PlayerMovement: MonoBehaviour
 {
     CharacterController characterController;
     Animator playerAnimator;
+    Camera playerCamera;
+    CameraUtility cameraUtility;
 
     public float speed = 6.0f;
     public float jumpSpeed = 8.0f;
@@ -21,31 +23,26 @@ public class PlayerMovement: MonoBehaviour
     private float horizontal;
     private float vertical;
 
-    private float mouseX;
-    private float mouseY;
-
-    // rotation speeds
-    public float speedH;
-    public float speedV;
-
     void Start()
     {
         characterController = GetComponent<CharacterController>();
         playerAnimator = GetComponent<Animator>();
+        playerCamera = GetComponent<Camera>();
 
-        speedH = 300f;
-        speedV = 300f;
+        cameraUtility = new CameraUtility(playerCamera);
     }
 
     void Update()
     {
-        moveCamera();
+        //moveCamera();
 
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
 
         characterMovement(horizontal, vertical);
         triggerAnimator(horizontal, vertical);
+
+        cameraUtility.followObject(characterController);
     }
 
     void characterMovement(float horizontal, float vertical)
@@ -73,18 +70,6 @@ public class PlayerMovement: MonoBehaviour
 
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
-    }
-
-    public void moveCamera()
-    {
-        mouseY += speedH * Input.GetAxis("Mouse X") * Time.deltaTime;
-        mouseX -= speedV * Input.GetAxis("Mouse Y") * Time.deltaTime;
-
-        transform.Rotate(mouseY, mouseX, 0f); // calculate new rotation
-        Vector3 currentRotation = new Vector3(mouseX, mouseY, 0.0f);
-
-        currentRotation.x = Mathf.Clamp(currentRotation.x, -20.0f, 20.0f); // clamp x rotation
-        transform.eulerAngles = currentRotation;
     }
 
     public void triggerAnimator(float horizontal, float vertical)
