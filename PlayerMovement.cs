@@ -44,11 +44,7 @@ public class PlayerMovement: MonoBehaviour
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
 
-        Debug.Log("horizontal = " + horizontal);
-        Debug.Log("vertical = " + vertical);
-
         characterMovement(horizontal, vertical);
-
         triggerAnimator(horizontal, vertical);
     }
 
@@ -93,17 +89,8 @@ public class PlayerMovement: MonoBehaviour
 
     public void triggerAnimator(float horizontal, float vertical)
     {
-        if (horizontal > 0 || vertical > 0)
-        {
-            // walk
-            playerAnimator.SetFloat("Forward", 1);
-            playerAnimator.SetFloat("Idle", 0);
-        }
-        else
-        {
-            playerAnimator.SetFloat("Forward", 0);
-            playerAnimator.SetFloat("Idle", 1);
-        }
-
+        playerAnimator.SetFloat("forward_back", vertical);
+        playerAnimator.SetFloat("right_left", horizontal);
+        playerAnimator.SetBool("OnGround", characterController.isGrounded);
     }
 }
