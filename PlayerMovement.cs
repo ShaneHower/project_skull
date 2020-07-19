@@ -11,7 +11,7 @@ public class PlayerMovement: MonoBehaviour
 {
     CharacterController characterController;
     Animator playerAnimator;
-    Camera playerCamera;
+    public Camera playerCamera;
     CameraUtility cameraUtility;
 
     public float speed = 6.0f;
@@ -27,9 +27,10 @@ public class PlayerMovement: MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
         playerAnimator = GetComponent<Animator>();
-        playerCamera = GetComponent<Camera>();
 
-        cameraUtility = new CameraUtility(playerCamera);
+        Debug.Log(playerCamera);
+
+        cameraUtility = new CameraUtility(playerCamera, characterController);
     }
 
     void Update()
@@ -42,7 +43,7 @@ public class PlayerMovement: MonoBehaviour
         characterMovement(horizontal, vertical);
         triggerAnimator(horizontal, vertical);
 
-        cameraUtility.followObject(characterController);
+        cameraUtility.followObject();
     }
 
     void characterMovement(float horizontal, float vertical)

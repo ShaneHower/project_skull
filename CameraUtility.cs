@@ -4,31 +4,49 @@ using UnityEngine;
 
 public class CameraUtility
 {
-    public Camera camera;
-    private Vector3 offset;
-    private float yaw;
+    private Camera cameraIn;
+    private CharacterController targetIn;
 
-    public CameraUtility(Camera camera)
+    private Transform camera;
+    private Transform target;
+
+    private Vector3 offset;
+
+    private float yaw;
+    private float pitch;
+
+    public CameraUtility(Camera cameraIn, CharacterController targetIn)
     {
-        this.camera = camera;
-        this.offset = new Vector3(10.0f, 4.0f, 3.0f);
+        this.camera = cameraIn.transform;
+        this.target = targetIn.transform;
+
+        this.offset = new Vector3(-5.0f, 4.0f, -2.0f) + target.transform.position;
+
+        this.pitch = this.camera.transform.eulerAngles.x;
         this.yaw = this.camera.transform.eulerAngles.y;
     }
 
-    public void followObject(CharacterController target)
+    public void followObject()
     {
-        this.camera.transform.position = target.transform.position + this.offset;
-        rotateCamera();
-        Debug.Log(this.yaw);
-    }
-
-    public void rotateCamera()
-    {
+        // rotate the camera around the player if the middle mouse button is down;
         if(Input.GetKey(KeyCode.Mouse2))
         {
-            this.yaw += Input.GetAxis("Mouse X"); 
-            this.camera.transform.eulerAngles = new Vector3(0.0f, this.yaw, 0.0f); 
+            yaw = Input.GetAxisRaw("Mouse X");
+            pitch = Input.GetAxisRaw("Mouse Y");
+
+            // what is quaternion.angleaxis?
+            if (yaw != 0.0f)
+            {
+                this.offset = Quaternion.AngleAxis(yaw, Vector3.up) * this.offset;
+            }
+
+            if (pitch != 0.0f)
+            {
+                this.offset = Quaternion.AngleAxis(pitch, Vector3.right) * this.offset;
+            }
         }
-        
+
+        this.camera.position = this.target.position + offset;
+        this.camera.LookAt(this.target.position);
     }
 }
