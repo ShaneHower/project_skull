@@ -1,20 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-// This script moves the character controller forward
-// and sideways based on the arrow keys.
-// It also jumps when pressing space.
-// Make sure to attach a character controller to the same game object.
-// It is recommended that you make only one call to Move or SimpleMove per frame.
-
 public class PlayerMovement: MonoBehaviour
 {
     CharacterController characterController;
     Animator playerAnimator;
-    public Camera playerCamera;
-    CameraUtility cameraUtility;
 
-    public float speed = 6.0f;
+    public float speed = 10.0f;
     public float jumpSpeed = 8.0f;
     public float gravity = 20.0f;
 
@@ -27,23 +19,15 @@ public class PlayerMovement: MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
         playerAnimator = GetComponent<Animator>();
-
-        Debug.Log(playerCamera);
-
-        cameraUtility = new CameraUtility(playerCamera, characterController);
     }
 
     void Update()
     {
-        //moveCamera();
-
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
 
         characterMovement(horizontal, vertical);
         triggerAnimator(horizontal, vertical);
-
-        cameraUtility.followObject();
     }
 
     void characterMovement(float horizontal, float vertical)
@@ -53,11 +37,7 @@ public class PlayerMovement: MonoBehaviour
         {
             // We are grounded, so recalculate
             // move direction directly from axes
-            moveDirection = new Vector3(horizontal, 0.0f, vertical);
-            moveDirection *= speed;
-
-            moveDirection = Camera.main.transform.TransformDirection(moveDirection);
-            moveDirection.y = 0.0f;
+            moveDirection = new Vector3(horizontal, 0.0f, vertical) * speed;
 
             if (Input.GetButtonDown("Jump"))
             {
