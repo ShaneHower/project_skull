@@ -11,6 +11,7 @@ public class PlayerMovement: MonoBehaviour
     public float gravity = 20.0f;
 
     private Vector3 moveDirection = Vector3.zero;
+    private Vector3 rotateDirection = Vector3.zero;
 
     private float horizontal;
     private float vertical;
@@ -23,8 +24,8 @@ public class PlayerMovement: MonoBehaviour
 
     void Update()
     {
-        horizontal = Input.GetAxisRaw("Horizontal");
-        vertical = Input.GetAxisRaw("Vertical");
+        horizontal = Input.GetAxis("Horizontal");
+        vertical = Input.GetAxis("Vertical");
 
         characterMovement(horizontal, vertical);
         triggerAnimator(horizontal, vertical);
@@ -49,14 +50,35 @@ public class PlayerMovement: MonoBehaviour
         // as an acceleration (ms^-2)
         moveDirection.y -= gravity * Time.deltaTime;
 
+
+        rotateCharacter(moveDirection);
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
+        
+    }
+
+    void rotateCharacter(Vector3 moveDirection)
+    {
+        // Character faces direction they are moving
+        if (moveDirection.x != 0.0f || moveDirection.z != 0.0f)
+        {
+            rotateDirection = new Vector3(moveDirection.x, 0.0f, moveDirection.z);
+            Debug.Log(rotateDirection);
+            transform.rotation = Quaternion.LookRotation(rotateDirection);
+        }
     }
 
     public void triggerAnimator(float horizontal, float vertical)
     {
-        playerAnimator.SetFloat("forward_back", vertical);
-        playerAnimator.SetFloat("right_left", horizontal);
+        if(horizontal != 0 || vertical != 0)
+        {
+            playerAnimator.SetInteger("walk", 1);
+        }
+        else
+        {
+            playerAnimator.SetInteger("walk", 0);
+        }
+
         playerAnimator.SetBool("OnGround", characterController.isGrounded);
     }
 }
