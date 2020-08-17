@@ -8,9 +8,10 @@ public class PlayerMovement: MonoBehaviour
     Transform playerCamera;
 
     public float walkSpeed = 10.0f;
-    public float jumpSpeed = 8.0f;
+    public float jumpSpeed = 10.0f;
     public float gravity = 20.0f;
-    float turnSmoothTime = 0.2f;
+    public float turnSmoothTime = 0.0f;
+    float velocityY;
     float turnSmoothVelocity;
 
     private float horizontal;
@@ -29,7 +30,6 @@ public class PlayerMovement: MonoBehaviour
         vertical = Input.GetAxisRaw("Vertical");
 
         characterMovement(horizontal, vertical);
-        triggerAnimator(horizontal, vertical);
     }
 
     void characterMovement(float horizontal, float vertical)
@@ -37,6 +37,7 @@ public class PlayerMovement: MonoBehaviour
 
         Vector2 input = new Vector2(horizontal, vertical);
         Vector2 inputDir = input.normalized;
+        float isWalking = inputDir.magnitude;
 
         if (inputDir != Vector2.zero)
         {
@@ -47,22 +48,38 @@ public class PlayerMovement: MonoBehaviour
             transform.eulerAngles = Vector3.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref turnSmoothVelocity, turnSmoothTime);
         }
 
-        float speed = walkSpeed * inputDir.magnitude;
-        transform.Translate(transform.forward * speed * Time.deltaTime, Space.World);
+        float speed = walkSpeed * isWalking;
+        Vector3 velocity = transform.forward * speed;
 
+        jump();
+        velocity.y = velocityY;
+
+        characterController.Move(velocity * Time.deltaTime);
+        triggerAnimator(isWalking);
     }
 
-    public void triggerAnimator(float horizontal, float vertical)
+    public void jump()
     {
-        if(horizontal != 0 || vertical != 0)
+        if (characterController.isGrounded)
         {
-            playerAnimator.SetInteger("walk", 1);
-        }
-        else
-        {
-            playerAnimator.SetInteger("walk", 0);
+            if(Input.GetButtonDown("Jump"))
+            {
+                velocityY = jumpSpeed;
+            }
         }
 
+        velocityY -= gravity * Time.deltaTime;
+    }
+
+    public void triggerAnimator(float isWalking)
+    {
+
+        if(!characterController.isGrounded)
+        {
+            isWalking = 0.0f;
+        }
+
+        playerAnimator.SetFloat("walk", isWalking);
         playerAnimator.SetBool("OnGround", characterController.isGrounded);
     }
 }
