@@ -7,10 +7,15 @@ public class PlayerMovement: MonoBehaviour
     Animator playerAnimator;
     Transform playerCamera;
 
-    public float walkSpeed = 10.0f;
-    public float jumpSpeed = 10.0f;
+    public float walkSpeed = 2.0f;
+    public float runSpeed = 6.0f;
+    public float jumpSpeed = 5.0f;
     public float gravity = 20.0f;
     public float turnSmoothTime = 0.0f;
+    public float speedSmoothTime = 0.1f;
+
+    float speedSmoothVelocity;
+    float currentSpeed;
     float velocityY;
     float turnSmoothVelocity;
 
@@ -29,15 +34,15 @@ public class PlayerMovement: MonoBehaviour
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
 
-        characterMovement(horizontal, vertical);
+        Move(horizontal, vertical);
     }
 
-    void characterMovement(float horizontal, float vertical)
+    void Move(float horizontal, float vertical)
     {
 
         Vector2 input = new Vector2(horizontal, vertical);
         Vector2 inputDir = input.normalized;
-        float isWalking = inputDir.magnitude;
+        float inputMag = inputDir.magnitude;
 
         if (inputDir != Vector2.zero)
         {
@@ -48,14 +53,16 @@ public class PlayerMovement: MonoBehaviour
             transform.eulerAngles = Vector3.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref turnSmoothVelocity, turnSmoothTime);
         }
 
-        float speed = walkSpeed * isWalking;
-        Vector3 velocity = transform.forward * speed;
+        bool isRunning = Input.GetButton("Run");
+        float targetSpeed = ((isRunning) ? runSpeed : walkSpeed) * inputMag;
+        currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
+        Vector3 velocity = transform.forward * currentSpeed;
 
         jump();
         velocity.y = velocityY;
 
         characterController.Move(velocity * Time.deltaTime);
-        triggerAnimator(isWalking);
+        animate(inputMag, isRunning);
     }
 
     public void jump()
@@ -71,15 +78,11 @@ public class PlayerMovement: MonoBehaviour
         velocityY -= gravity * Time.deltaTime;
     }
 
-    public void triggerAnimator(float isWalking)
+    public void animate(float inputMag, bool isRunning)
     {
-
-        if(!characterController.isGrounded)
-        {
-            isWalking = 0.0f;
-        }
-
-        playerAnimator.SetFloat("walk", isWalking);
-        playerAnimator.SetBool("OnGround", characterController.isGrounded);
+        // check if the character is colliding with anything.  The characterController magnitude will be zero if they are blocked from moving
+        currentSpeed = new Vector2(characterController.velocity.x, characterController.velocity.z).magnitude;
+        float speedPercent = ((isRunning) ? currentSpeed/runSpeed: currentSpeed/walkSpeed * 0.5f) * inputMag;
+        playerAnimator.SetFloat("speedPercent", speedPercent, speedSmoothTime, Time.deltaTime);
     }
 }
