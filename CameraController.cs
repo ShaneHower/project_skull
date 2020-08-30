@@ -4,11 +4,11 @@ public class CameraController : MonoBehaviour
 {
     public Transform target;
 
-    public float speed = 1.0f;
+    public float speed = 150.0f;
     public float dstFromTarget = 4.0f;
     public float pitch;
     public float yaw;
-    public float smoothTimePos = 0.1f;
+    public float smoothTimePos = 0.18f;
 
     Vector3 smoothVP;
     Vector3 targetRotation;
@@ -21,8 +21,8 @@ public class CameraController : MonoBehaviour
 
     void moveCamera()
     {
-        yaw += speed * Input.GetAxis("Mouse X"); 
-        pitch -= speed * Input.GetAxis("Mouse Y");
+        yaw += speed * Input.GetAxis("Mouse X") * Time.deltaTime; 
+        pitch -= speed * Input.GetAxis("Mouse Y") * Time.deltaTime;
         pitch = Mathf.Clamp(pitch, -10, 60);
 
         targetRotation = new Vector3(pitch, yaw, 0.0f);
