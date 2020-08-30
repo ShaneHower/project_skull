@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class PlayerMovement: MonoBehaviour
 {
@@ -9,10 +10,10 @@ public class PlayerMovement: MonoBehaviour
 
     public float walkSpeed = 2.0f;
     public float runSpeed = 6.0f;
-    public float jumpSpeed = 5.0f;
+    public float jumpSpeed = 7.0f;
     public float gravity = 20.0f;
-    public float turnSmoothTime = 0.0f;
-    public float speedSmoothTime = 0.1f;
+    public float turnSmoothTime = 0.12f;
+    public float speedSmoothTime = 0.05f;
 
     float speedSmoothVelocity;
     float currentSpeed;
@@ -47,6 +48,7 @@ public class PlayerMovement: MonoBehaviour
         Vector2 inputDir = input.normalized;
         float inputMag = inputDir.magnitude;
 
+        Debug.Log(inputDir);
         if (inputDir != Vector2.zero)
         {
             //using atan2 because it deals with the denominator being 0.  Arctan2 returns angle in radians. adding the camera's y rotation so that the player moves in the direction the camera is facing
