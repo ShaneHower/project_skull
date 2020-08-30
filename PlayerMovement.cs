@@ -19,6 +19,8 @@ public class PlayerMovement: MonoBehaviour
     float velocityY;
     float turnSmoothVelocity;
 
+    bool basicAttack;
+
     private float horizontal;
     private float vertical;
 
@@ -35,6 +37,7 @@ public class PlayerMovement: MonoBehaviour
         vertical = Input.GetAxisRaw("Vertical");
 
         Move(horizontal, vertical);
+        attack();
     }
 
     void Move(float horizontal, float vertical)
@@ -78,11 +81,17 @@ public class PlayerMovement: MonoBehaviour
         velocityY -= gravity * Time.deltaTime;
     }
 
+    public void attack()
+    {
+        basicAttack = Input.GetButtonDown("Attack");
+    }
+
     public void animate(float inputMag, bool isRunning)
     {
         // check if the character is colliding with anything.  The characterController magnitude will be zero if they are blocked from moving
         currentSpeed = new Vector2(characterController.velocity.x, characterController.velocity.z).magnitude;
         float speedPercent = ((isRunning) ? currentSpeed/runSpeed: currentSpeed/walkSpeed * 0.5f) * inputMag;
         playerAnimator.SetFloat("speedPercent", speedPercent, speedSmoothTime, Time.deltaTime);
+        playerAnimator.SetBool("basicAttack", basicAttack);
     }
 }
