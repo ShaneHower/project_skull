@@ -10,19 +10,30 @@ public class CameraController : MonoBehaviour
     public float yaw;
     public float smoothTimePos = 0.18f;
 
+    float xRotate;
+    float yRotate;
+
     Vector3 smoothVP;
     Vector3 targetRotation;
 
     // Update is called once per frame
+    private void Update()
+    {
+        
+    }
+
     void LateUpdate()
     {
+        xRotate = Input.GetAxis("Mouse X");
+        yRotate = Input.GetAxis("Mouse Y");
         moveCamera();
     }
 
     void moveCamera()
     {
-        yaw += speed * Input.GetAxis("Mouse X") * Time.deltaTime; 
-        pitch -= speed * Input.GetAxis("Mouse Y") * Time.deltaTime;
+
+        yaw += speed * xRotate * Time.deltaTime; 
+        pitch -= speed * yRotate * Time.deltaTime;
         pitch = Mathf.Clamp(pitch, -10, 60);
 
         targetRotation = new Vector3(pitch, yaw, 0.0f);

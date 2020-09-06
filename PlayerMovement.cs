@@ -19,11 +19,16 @@ public class PlayerMovement: MonoBehaviour
     float currentSpeed;
     float velocityY;
     float turnSmoothVelocity;
+    float inputMag;
 
     bool basicAttack;
+    bool isJumping;
+    bool isRunning;
 
     private float horizontal;
     private float vertical;
+
+    Vector2 inputDir;
 
     void Start()
     {
@@ -34,21 +39,28 @@ public class PlayerMovement: MonoBehaviour
 
     void Update()
     {
+        playerMoveInput();
+        isJumping = Input.GetButtonDown("Jump");
+        basicAttack = Input.GetButtonDown("Attack");
+        isRunning = Input.GetButton("Run");
+
+        Move();
+        jump();
+        animate();
+    }
+
+    void playerMoveInput()
+    {
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
 
-        Move(horizontal, vertical);
-        attack();
+        Vector2 input = new Vector2(horizontal, vertical);
+        inputDir = input.normalized;
+        inputMag = inputDir.magnitude;
     }
 
-    void Move(float horizontal, float vertical)
+    void Move()
     {
-
-        Vector2 input = new Vector2(horizontal, vertical);
-        Vector2 inputDir = input.normalized;
-        float inputMag = inputDir.magnitude;
-
-        Debug.Log(inputDir);
         if (inputDir != Vector2.zero)
         {
             //using atan2 because it deals with the denominator being 0.  Arctan2 returns angle in radians. adding the camera's y rotation so that the player moves in the direction the camera is facing
@@ -57,8 +69,6 @@ public class PlayerMovement: MonoBehaviour
             // and turnSmoothVelocity. ref lets the function modify the value? 
             transform.eulerAngles = Vector3.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref turnSmoothVelocity, turnSmoothTime);
         }
-
-        bool isRunning = Input.GetButton("Run");
         float targetSpeed = ((isRunning) ? runSpeed : walkSpeed) * inputMag;
         currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
         Vector3 velocity = transform.forward * currentSpeed;
@@ -67,14 +77,13 @@ public class PlayerMovement: MonoBehaviour
         velocity.y = velocityY;
 
         characterController.Move(velocity * Time.deltaTime);
-        animate(inputMag, isRunning);
     }
 
     public void jump()
     {
         if (characterController.isGrounded)
         {
-            if(Input.GetButtonDown("Jump"))
+            if(isJumping)
             {
                 velocityY = jumpSpeed;
             }
@@ -83,12 +92,7 @@ public class PlayerMovement: MonoBehaviour
         velocityY -= gravity * Time.deltaTime;
     }
 
-    public void attack()
-    {
-        basicAttack = Input.GetButtonDown("Attack");
-    }
-
-    public void animate(float inputMag, bool isRunning)
+    public void animate()
     {
         // check if the character is colliding with anything.  The characterController magnitude will be zero if they are blocked from moving
         currentSpeed = new Vector2(characterController.velocity.x, characterController.velocity.z).magnitude;
