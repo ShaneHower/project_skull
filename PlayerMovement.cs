@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerMovement: MonoBehaviour
 {
@@ -10,20 +8,21 @@ public class PlayerMovement: MonoBehaviour
 
     public float walkSpeed = 2.0f;
     public float runSpeed = 6.0f;
-    public float jumpSpeed = 7.0f;
+    public float jumpHeight = 200.0f;
     public float gravity = 20.0f;
     public float turnSmoothTime = 0.12f;
     public float speedSmoothTime = 0.05f;
 
     float speedSmoothVelocity;
     float currentSpeed;
-    float velocityY;
     float turnSmoothVelocity;
     float inputMag;
 
     bool basicAttack;
     bool isJumping;
     bool isRunning;
+
+    Vector3 playerVelocity;
 
     private float horizontal;
     private float vertical;
@@ -40,12 +39,14 @@ public class PlayerMovement: MonoBehaviour
     void Update()
     {
         playerMoveInput();
+
         isJumping = Input.GetButtonDown("Jump");
         basicAttack = Input.GetButtonDown("Attack");
         isRunning = Input.GetButton("Run");
 
-        Move();
+        move();
         jump();
+        characterController.Move(playerVelocity * Time.deltaTime);
         animate();
     }
 
@@ -59,7 +60,7 @@ public class PlayerMovement: MonoBehaviour
         inputMag = inputDir.magnitude;
     }
 
-    void Move()
+    void move()
     {
         if (inputDir != Vector2.zero)
         {
@@ -71,25 +72,18 @@ public class PlayerMovement: MonoBehaviour
         }
         float targetSpeed = ((isRunning) ? runSpeed : walkSpeed) * inputMag;
         currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
-        Vector3 velocity = transform.forward * currentSpeed;
-
-        jump();
-        velocity.y = velocityY;
-
-        characterController.Move(velocity * Time.deltaTime);
+        playerVelocity = transform.forward * currentSpeed;
     }
 
     public void jump()
     {
-        if (characterController.isGrounded)
+        if (isJumping && characterController.isGrounded)
         {
-            if(isJumping)
-            {
-                velocityY = jumpSpeed;
-            }
+            playerVelocity.y += Mathf.Sqrt(jumpHeight * 2.0f * gravity);
+            Debug.Log("player y: " + playerVelocity.y);
+            Debug.Log("velocity: " + playerVelocity);
         }
-
-        velocityY -= gravity * Time.deltaTime;
+        playerVelocity.y -= gravity * Time.deltaTime;
     }
 
     public void animate()
