@@ -7,7 +7,7 @@ public class PlayerMovement: MonoBehaviour
     Animator playerAnimator;
     Transform playerCamera;
     GameObject groundDetectorObject { get { return transform.Find("Ground Detector").gameObject; } }
-    GroundDetector groundDetector { get { return groundDetectorObject.GetComponent<GroundDetector>(); } }
+    TriggerDetector groundDetector { get { return groundDetectorObject.GetComponent<TriggerDetector>(); } }
 
     // public variables that can be tuned
     public float walkSpeed = 2.0f;
@@ -16,7 +16,7 @@ public class PlayerMovement: MonoBehaviour
     public float gravity = 20.0f;
     public float turnSmoothTime = 0.12f;
     public float speedSmoothTime = 0.035f;
-    public bool isGrounded { get { return groundDetector.isGrounded; } }
+    public bool isGrounded { get { return groundDetector.isActive; } }
 
     // ref variables 
     float speedSmoothVelocity;
