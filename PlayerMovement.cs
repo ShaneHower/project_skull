@@ -2,66 +2,77 @@
 
 public class PlayerMovement: MonoBehaviour
 {
+    // define needed game objects and outside scripts
     CharacterController characterController;
     Animator playerAnimator;
     Transform playerCamera;
+    GameObject groundDetectorObject { get { return transform.Find("Ground Detector").gameObject; } }
+    GroundDetector groundDetector { get { return groundDetectorObject.GetComponent<GroundDetector>(); } }
 
+    // public variables that can be tuned
     public float walkSpeed = 2.0f;
     public float runSpeed = 6.0f;
-    public float jumpHeight = 200.0f;
+    public float jumpHeight = 1f;
     public float gravity = 20.0f;
     public float turnSmoothTime = 0.12f;
-    public float speedSmoothTime = 0.05f;
+    public float speedSmoothTime = 0.035f;
+    public bool isGrounded { get { return groundDetector.isGrounded; } }
 
+    // ref variables 
     float speedSmoothVelocity;
-    float currentSpeed;
     float turnSmoothVelocity;
-    float inputMag;
 
+    // trigger animation variables
     bool basicAttack;
     bool isJumping;
     bool isRunning;
+    float currentSpeed;
 
-    Vector3 playerVelocity;
-
+    // variables needed for walk/run
+    private float inputMag;
     private float horizontal;
     private float vertical;
-
-    Vector2 inputDir;
+    float playerHeight;
+    Vector3 playerVelocity;
 
     void Start()
     {
         characterController = GetComponent<CharacterController>();
+
         playerAnimator = GetComponent<Animator>();
         playerCamera = Camera.main.transform;
     }
 
     void Update()
     {
-        playerMoveInput();
-
-        isJumping = Input.GetButtonDown("Jump");
-        basicAttack = Input.GetButtonDown("Attack");
-        isRunning = Input.GetButton("Run");
-
-        move();
+        playerInput();
+        walkRun();
         jump();
+        
+        playerVelocity.y = playerHeight;
         characterController.Move(playerVelocity * Time.deltaTime);
+
         animate();
     }
 
-    void playerMoveInput()
+    void playerInput()
     {
+        // player movement inputs
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
 
-        Vector2 input = new Vector2(horizontal, vertical);
-        inputDir = input.normalized;
-        inputMag = inputDir.magnitude;
+        // other player inputs
+        isJumping = Input.GetButtonDown("Jump");
+        basicAttack = Input.GetButtonDown("Attack");
+        isRunning = Input.GetButton("Run");
     }
 
-    void move()
+    void walkRun()
     {
+        Vector2 input = new Vector2(horizontal, vertical);
+        Vector2 inputDir = input.normalized;
+        inputMag = inputDir.magnitude;
+
         if (inputDir != Vector2.zero)
         {
             //using atan2 because it deals with the denominator being 0.  Arctan2 returns angle in radians. adding the camera's y rotation so that the player moves in the direction the camera is facing
@@ -77,13 +88,12 @@ public class PlayerMovement: MonoBehaviour
 
     public void jump()
     {
-        if (isJumping && characterController.isGrounded)
+        if(isGrounded && isJumping)
         {
-            playerVelocity.y += Mathf.Sqrt(jumpHeight * 2.0f * gravity);
-            Debug.Log("player y: " + playerVelocity.y);
-            Debug.Log("velocity: " + playerVelocity);
+            playerHeight = Mathf.Sqrt(jumpHeight * 2.0f * gravity);
         }
-        playerVelocity.y -= gravity * Time.deltaTime;
+
+        playerHeight -= gravity * Time.deltaTime;
     }
 
     public void animate()

@@ -17,11 +17,6 @@ public class CameraController : MonoBehaviour
     Vector3 targetRotation;
 
     // Update is called once per frame
-    private void Update()
-    {
-        
-    }
-
     void LateUpdate()
     {
         xRotate = Input.GetAxis("Mouse X");
