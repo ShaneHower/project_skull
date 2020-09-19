@@ -1,38 +1,42 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
     public Transform target;
 
-    public float speed = 1.0f;
-    public float dstFromTarget = 6.0f;
+    public float speed = 150.0f;
+    public float dstFromTarget = 4.0f;
     public float pitch;
     public float yaw;
-    public float smoothTime = 0.12f;
+    public float smoothTimePos = 0.18f;
 
-    Vector3 smoothVelocity;
-    Vector3 currentRotation;
+    float xRotate;
+    float yRotate;
+
+    Vector3 smoothVP;
     Vector3 targetRotation;
 
     // Update is called once per frame
     void LateUpdate()
     {
-        rotateCamera();
+        xRotate = Input.GetAxis("Mouse X");
+        yRotate = Input.GetAxis("Mouse Y");
+        moveCamera();
     }
 
-    void rotateCamera()
+    void moveCamera()
     {
-        yaw += speed * Input.GetAxis("Mouse X"); 
-        pitch -= speed * Input.GetAxis("Mouse Y");
+
+        yaw += speed * xRotate * Time.deltaTime; 
+        pitch -= speed * yRotate * Time.deltaTime;
         pitch = Mathf.Clamp(pitch, -10, 60);
 
         targetRotation = new Vector3(pitch, yaw, 0.0f);
-        // what is this
-        currentRotation = Vector3.SmoothDamp(currentRotation, targetRotation, ref smoothVelocity, smoothTime);
+        transform.eulerAngles = targetRotation;
 
-        transform.eulerAngles = currentRotation;
-        transform.position = target.position - transform.forward * dstFromTarget;
+        Vector3 newPosition = target.position - (transform.forward * dstFromTarget);
+
+        //SmoothDamp makes the camera feel like the player is pulling it along.  Think of a balloon on a string tied to the PC
+        transform.position = Vector3.SmoothDamp(transform.position, newPosition, ref smoothVP, smoothTimePos);
     }
 }
