@@ -1,45 +1,33 @@
 ﻿using UnityEngine;
+using Databox;
 
 public class TriggerDetector : MonoBehaviour
 {
+    //game objects
+    Animator animator;
+    public DataboxObject database;
+    
+    // public vars 
     public bool isActive;
     public string objectName;
-    public string colliderType;
-    public bool hasTriggered;
-    public Animator animator;
-
+    public string colliderTag;
     private void Start()
     {
-        objectName = this.gameObject.name;
-        animator = GetComponentInParent<Animator>();
-
-        // This will eventually be done with some kind of database, this is just proof of concept.
-        if (objectName == "weapon")
-        {
-            colliderType = "enemy";
-            hasTriggered = animator.GetCurrentAnimatorStateInfo(0).IsTag("attack");
-        }
-        else if (objectName == "Ground Detector")
-        {
-            colliderType = "terrain";
-        }
+        collectData();
     }
 
-    private void Update()
+    private void collectData()
     {
-        if(objectName == "weapon")
-        {
-            hasTriggered = animator.GetCurrentAnimatorStateInfo(0).IsTag("attack");
-        }
-        else
-        {
-            hasTriggered = false;
-        }
+        objectName = this.gameObject.name;
+        string tableName = "trigger_detector_inst_vars";
+
+        StringType colliderTagType = database.GetData<StringType>(tableName, objectName, "type");
+        colliderTag = colliderTagType.Value.ToString();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == colliderType && !hasTriggered)
+        if (other.gameObject.tag == colliderTag)
         {
             isActive = true;
         }
@@ -47,7 +35,7 @@ public class TriggerDetector : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == colliderType)
+        if (other.gameObject.tag == colliderTag)
         {
             isActive = false;
         }
