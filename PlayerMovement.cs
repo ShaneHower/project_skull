@@ -6,7 +6,7 @@ public class PlayerMovement: MonoBehaviour
     CharacterController characterController;
     Animator playerAnimator;
     Transform playerCamera;
-    GameObject groundDetectorObject { get { return transform.Find("Ground Detector").gameObject; } }
+    GameObject groundDetectorObject { get { return transform.Find("ground_detector").gameObject; } }
     TriggerDetector groundDetector { get { return groundDetectorObject.GetComponent<TriggerDetector>(); } }
 
     // public variables that can be tuned
