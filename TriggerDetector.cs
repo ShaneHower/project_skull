@@ -11,6 +11,11 @@ public class TriggerDetector : MonoBehaviour
     public bool isActive;
     public string objectName;
     public string colliderTag;
+    public string triggerName;
+
+    // private vars
+    private string useAs;
+
     private void Start()
     {
         collectData();
@@ -23,6 +28,9 @@ public class TriggerDetector : MonoBehaviour
 
         StringType colliderTagType = database.GetData<StringType>(tableName, objectName, "type");
         colliderTag = colliderTagType.Value.ToString();
+
+        StringType useAsType = database.GetData<StringType>(tableName, objectName, "use_as");
+        useAs = useAsType.Value.ToString().ToLower();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -30,12 +38,16 @@ public class TriggerDetector : MonoBehaviour
         if (other.gameObject.tag == colliderTag)
         {
             isActive = true;
+            triggerName = other.transform.root.name;
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == colliderTag)
+        // when this class is used as hit detection, isActive has to be changed outside of this script
+        // otherwise hp will be continually reduced as isActive doesn't change until it exits the collider
+        // I should consider splitting this class into two, hitDetector groundDetector.
+        if (other.gameObject.tag == colliderTag && useAs != "hitbox detector")
         {
             isActive = false;
         }
