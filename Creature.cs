@@ -7,11 +7,15 @@ public class Creature : MonoBehaviour
     GameObject hitbox { get { return transform.Find("hitbox").gameObject; } }
     TriggerDetector hitboxDetector { get { return hitbox.GetComponent<TriggerDetector>(); } }
 
+    public ParticleSystem creatureParticles; //{ get { return GetComponent<ParticleSystem>(); } }
+
+
     public string objectName;
     public float hp;
     public float attackerDamage;
     public bool isDead;
     public bool isHit;
+    public float deathTimer = 200.0f;
 
     public bool hitboxTrigger { get { return hitboxDetector.isActive; } }
     public string triggerName { get { return hitboxDetector.triggerName; } }
@@ -28,7 +32,7 @@ public class Creature : MonoBehaviour
         
         if (isDead)
         {
-            checkDeath();
+            startDeath();
         }
     }
 
@@ -61,8 +65,15 @@ public class Creature : MonoBehaviour
         isDead = (hp == 0 || hp < 0) ? true : false;
     }
 
-    private void checkDeath()
+    private void startDeath()
     {
-        Destroy(this.gameObject);
+        creatureParticles.gameObject.SetActive(true);
+        deathTimer -= 1;
+
+        if(deathTimer == 0.0f)
+        {
+            Destroy(this.gameObject);
+        }
+        
     }
 }
