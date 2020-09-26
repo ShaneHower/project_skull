@@ -24,9 +24,13 @@ public class PlayerMovement: MonoBehaviour
 
     // trigger animation variables
     bool basicAttack;
+    bool heavyAttack;
     bool isJumping;
     bool isRunning;
     float currentSpeed;
+    int heavyAttackCycle = 0;
+
+    float heavyComboTimer = 0.0f;
 
     // variables needed for walk/run
     private float inputMag;
@@ -46,8 +50,13 @@ public class PlayerMovement: MonoBehaviour
     void Update()
     {
         playerInput();
+        if(heavyAttack)
+        {
+            Debug.Log("HEAVY!");
+        }
         walkRun();
         jump();
+        attack();
         
         playerVelocity.y = playerHeight;
         characterController.Move(playerVelocity * Time.deltaTime);
@@ -57,14 +66,25 @@ public class PlayerMovement: MonoBehaviour
 
     void playerInput()
     {
-        // player movement inputs
-        horizontal = Input.GetAxisRaw("Horizontal");
-        vertical = Input.GetAxisRaw("Vertical");
 
-        // other player inputs
+        // player inputs
         isJumping = Input.GetButtonDown("Jump");
         basicAttack = Input.GetButtonDown("Attack");
         isRunning = Input.GetButton("Run");
+        heavyAttack = Input.GetButtonDown("Heavy Attack");
+
+        //animator triggers
+        bool isAttacking = playerAnimator.GetCurrentAnimatorStateInfo(0).IsTag("attack");
+
+        // player movement inputs
+        horizontal = isAttacking ? 0.0f : Input.GetAxisRaw("Horizontal");
+        vertical = isAttacking ? 0.0f : Input.GetAxisRaw("Vertical");
+
+        if (isAttacking)
+        {
+            Debug.Log(horizontal + " " + vertical);
+        }
+
     }
 
     void walkRun()
@@ -96,6 +116,32 @@ public class PlayerMovement: MonoBehaviour
         playerHeight -= gravity * Time.deltaTime;
     }
 
+    private void comboTimer()
+    {
+        if(heavyAttack)
+        {
+            heavyComboTimer = 1.0f;
+        }
+        else
+        {
+            heavyComboTimer = (heavyComboTimer < 0) ? 0 : (heavyComboTimer - Time.deltaTime);
+        }
+    }
+
+    private void attack()
+    {
+        comboTimer();
+
+        if(heavyAttack && heavyComboTimer != 0)
+        {
+            heavyAttackCycle = heavyAttackCycle < 3 ? heavyAttackCycle += 1 : 0;
+        }
+        else if(heavyComboTimer == 0)
+        {
+            heavyAttackCycle = 0;
+        }
+    }
+
     public void animate()
     {
         // check if the character is colliding with anything.  The characterController magnitude will be zero if they are blocked from moving
@@ -103,5 +149,6 @@ public class PlayerMovement: MonoBehaviour
         float speedPercent = ((isRunning) ? currentSpeed/runSpeed: currentSpeed/walkSpeed * 0.5f) * inputMag;
         playerAnimator.SetFloat("speedPercent", speedPercent, speedSmoothTime, Time.deltaTime);
         playerAnimator.SetBool("basicAttack", basicAttack);
+        playerAnimator.SetInteger("heavyAttack", heavyAttackCycle);
     }
 }
