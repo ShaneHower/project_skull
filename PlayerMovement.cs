@@ -6,8 +6,11 @@ public class PlayerMovement: MonoBehaviour
     CharacterController characterController;
     Animator playerAnimator;
     Transform playerCamera;
+
+    // ground detector vars
     GameObject groundDetectorObject { get { return transform.Find("ground_detector").gameObject; } }
-    TriggerDetector groundDetector { get { return groundDetectorObject.GetComponent<TriggerDetector>(); } }
+    GroundDetector groundDetector { get { return groundDetectorObject.GetComponent<GroundDetector>(); } }
+    public bool isGrounded { get { return groundDetector.isGrounded; } }
 
     // public variables that can be tuned
     public float walkSpeed = 2.0f;
@@ -16,7 +19,6 @@ public class PlayerMovement: MonoBehaviour
     public float gravity = 20.0f;
     public float turnSmoothTime = 0.12f;
     public float speedSmoothTime = 0.035f;
-    public bool isGrounded { get { return groundDetector.isActive; } }
 
     // ref variables 
     float speedSmoothVelocity;
@@ -27,6 +29,7 @@ public class PlayerMovement: MonoBehaviour
     bool heavyAttack;
     bool isJumping;
     bool isRunning;
+    public bool isAttacking;
     float currentSpeed;
     int heavyAttackCycle = 0;
 
@@ -50,10 +53,7 @@ public class PlayerMovement: MonoBehaviour
     void Update()
     {
         playerInput();
-        if(heavyAttack)
-        {
-            Debug.Log("HEAVY!");
-        }
+
         walkRun();
         attack();
         jump();
@@ -74,17 +74,11 @@ public class PlayerMovement: MonoBehaviour
         heavyAttack = Input.GetButtonDown("Heavy Attack");
 
         //animator triggers
-        bool isAttacking = playerAnimator.GetCurrentAnimatorStateInfo(0).IsTag("attack");
+        isAttacking = playerAnimator.GetCurrentAnimatorStateInfo(0).IsTag("attack");
 
         // player movement inputs
         horizontal = isAttacking ? 0.0f : Input.GetAxisRaw("Horizontal");
         vertical = isAttacking ? 0.0f : Input.GetAxisRaw("Vertical");
-
-        if (isAttacking)
-        {
-            Debug.Log(horizontal + " " + vertical);
-        }
-
     }
 
     void walkRun()
@@ -120,7 +114,7 @@ public class PlayerMovement: MonoBehaviour
     {
         if(heavyAttack)
         {
-            heavyComboTimer = 1.0f;
+            heavyComboTimer = 1.1f;
         }
         else
         {
