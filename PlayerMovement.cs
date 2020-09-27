@@ -55,8 +55,8 @@ public class PlayerMovement: MonoBehaviour
             Debug.Log("HEAVY!");
         }
         walkRun();
-        jump();
         attack();
+        jump();
         
         playerVelocity.y = playerHeight;
         characterController.Move(playerVelocity * Time.deltaTime);
@@ -103,7 +103,7 @@ public class PlayerMovement: MonoBehaviour
         }
         float targetSpeed = ((isRunning) ? runSpeed : walkSpeed) * inputMag;
         currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
-        playerVelocity = transform.forward * currentSpeed;
+        playerVelocity = transform.forward * targetSpeed;
     }
 
     public void jump()
