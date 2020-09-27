@@ -4,21 +4,19 @@ using Databox;
 public class Creature : MonoBehaviour
 {
     public DataboxObject database;
-    GameObject hitbox { get { return transform.Find("hitbox").gameObject; } }
-    TriggerDetector hitboxDetector { get { return hitbox.GetComponent<TriggerDetector>(); } }
-
-    public ParticleSystem creatureParticles; //{ get { return GetComponent<ParticleSystem>(); } }
+    public GameObject hitbox { get { return transform.Find("hitbox").gameObject; } }
+    HitBoxDetector hitBoxDetector { get { return hitbox.GetComponent<HitBoxDetector>(); } }
+    //public ParticleSystem creatureParticles { get { return GetComponent<ParticleSystem>(); } }
 
 
     public string objectName;
     public float hp;
     public float attackerDamage;
     public bool isDead;
-    public bool isHit;
+    public bool isHit { get { return hitBoxDetector.isHit; } }
     public float deathTimer = 200.0f;
 
-    public bool hitboxTrigger { get { return hitboxDetector.isActive; } }
-    public string triggerName { get { return hitboxDetector.triggerName; } }
+    public string triggerRootName { get { return hitBoxDetector.triggerRootName; } }
 
     void Start()
     {
@@ -48,18 +46,17 @@ public class Creature : MonoBehaviour
     private void collectAttackerData()
     {
         string tableName = "stats";
-        FloatType attackerDamageData = database.GetData<FloatType>(tableName, triggerName, "damage");
+        FloatType attackerDamageData = database.GetData<FloatType>(tableName, triggerRootName, "damage");
         attackerDamage = attackerDamageData.Value;
     }
 
     private void checkHitBox()
     {
-        if (hitboxTrigger)
+        if (isHit)
         {
             collectAttackerData();
             hp = hp - attackerDamage;
-            hitboxDetector.isActive = false;
-            Debug.Log(hp);
+            hitBoxDetector.isHit = false;
         }
 
         isDead = (hp == 0 || hp < 0) ? true : false;
@@ -67,7 +64,7 @@ public class Creature : MonoBehaviour
 
     private void startDeath()
     {
-        creatureParticles.gameObject.SetActive(true);
+        //creatureParticles.gameObject.SetActive(true);
         deathTimer -= 1;
 
         if(deathTimer == 0.0f)
