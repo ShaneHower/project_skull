@@ -6,11 +6,8 @@ public class PlayerMovement: MonoBehaviour
     CharacterController characterController;
     Animator playerAnimator;
     Transform playerCamera;
-
-    // ground detector vars
-    GameObject groundDetectorObject { get { return transform.Find("ground_detector").gameObject; } }
+    GameObject groundDetectorObject { get { return transform.Find("Ground Detector").gameObject; } }
     GroundDetector groundDetector { get { return groundDetectorObject.GetComponent<GroundDetector>(); } }
-    public bool isGrounded { get { return groundDetector.isGrounded; } }
 
     // public variables that can be tuned
     public float walkSpeed = 2.0f;
@@ -19,6 +16,7 @@ public class PlayerMovement: MonoBehaviour
     public float gravity = 20.0f;
     public float turnSmoothTime = 0.12f;
     public float speedSmoothTime = 0.035f;
+    public bool isGrounded { get { return groundDetector.isGrounded; } }
 
     // ref variables 
     float speedSmoothVelocity;
@@ -26,14 +24,9 @@ public class PlayerMovement: MonoBehaviour
 
     // trigger animation variables
     bool basicAttack;
-    bool heavyAttack;
     bool isJumping;
     bool isRunning;
-    public bool isAttacking;
     float currentSpeed;
-    int heavyAttackCycle = 0;
-
-    float heavyComboTimer = 0.0f;
 
     // variables needed for walk/run
     private float inputMag;
@@ -53,9 +46,7 @@ public class PlayerMovement: MonoBehaviour
     void Update()
     {
         playerInput();
-
         walkRun();
-        attack();
         jump();
         
         playerVelocity.y = playerHeight;
@@ -66,19 +57,14 @@ public class PlayerMovement: MonoBehaviour
 
     void playerInput()
     {
+        // player movement inputs
+        horizontal = Input.GetAxisRaw("Horizontal");
+        vertical = Input.GetAxisRaw("Vertical");
 
-        // player inputs
+        // other player inputs
         isJumping = Input.GetButtonDown("Jump");
         basicAttack = Input.GetButtonDown("Attack");
         isRunning = Input.GetButton("Run");
-        heavyAttack = Input.GetButtonDown("Heavy Attack");
-
-        //animator triggers
-        isAttacking = playerAnimator.GetCurrentAnimatorStateInfo(0).IsTag("attack");
-
-        // player movement inputs
-        horizontal = isAttacking ? 0.0f : Input.GetAxisRaw("Horizontal");
-        vertical = isAttacking ? 0.0f : Input.GetAxisRaw("Vertical");
     }
 
     void walkRun()
@@ -97,7 +83,7 @@ public class PlayerMovement: MonoBehaviour
         }
         float targetSpeed = ((isRunning) ? runSpeed : walkSpeed) * inputMag;
         currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
-        playerVelocity = transform.forward * targetSpeed;
+        playerVelocity = transform.forward * currentSpeed;
     }
 
     public void jump()
@@ -110,32 +96,6 @@ public class PlayerMovement: MonoBehaviour
         playerHeight -= gravity * Time.deltaTime;
     }
 
-    private void comboTimer()
-    {
-        if(heavyAttack)
-        {
-            heavyComboTimer = 1.1f;
-        }
-        else
-        {
-            heavyComboTimer = (heavyComboTimer < 0) ? 0 : (heavyComboTimer - Time.deltaTime);
-        }
-    }
-
-    private void attack()
-    {
-        comboTimer();
-
-        if(heavyAttack && heavyComboTimer != 0)
-        {
-            heavyAttackCycle = heavyAttackCycle < 3 ? heavyAttackCycle += 1 : 0;
-        }
-        else if(heavyComboTimer == 0)
-        {
-            heavyAttackCycle = 0;
-        }
-    }
-
     public void animate()
     {
         // check if the character is colliding with anything.  The characterController magnitude will be zero if they are blocked from moving
@@ -143,6 +103,5 @@ public class PlayerMovement: MonoBehaviour
         float speedPercent = ((isRunning) ? currentSpeed/runSpeed: currentSpeed/walkSpeed * 0.5f) * inputMag;
         playerAnimator.SetFloat("speedPercent", speedPercent, speedSmoothTime, Time.deltaTime);
         playerAnimator.SetBool("basicAttack", basicAttack);
-        playerAnimator.SetInteger("heavyAttack", heavyAttackCycle);
     }
 }
